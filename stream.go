@@ -105,12 +105,12 @@ func (stream *Stream) stream() {
 	var err error
 
 connect:
+	if stream.state == StreamClosed {
+		return
+	}
 	stream.state = StreamConnecting
 	for backoff := stream.retry; ; backoff *= 2 {
 		stream.Response, err = stream.Client.Do(stream.Request)
-		if stream.state == StreamClosed {
-			return
-		}
 		if err != nil || stream.Response.StatusCode != 200 {
 			if err = stream.Client.CheckReconnect(stream, err); err != nil {
 				return
